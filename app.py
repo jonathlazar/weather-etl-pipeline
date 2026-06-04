@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from sqlalchemy import create_engine, text
 import requests
 import pandas as pd
@@ -9,6 +10,8 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
+
 API_KEY = os.getenv("API_KEY")
 engine = create_engine("sqlite:///weather_data.db")
 
@@ -38,10 +41,6 @@ def load(data):
     df.to_sql("weather", con=engine, if_exists="append", index=False)
 
 # ROUTES
-@app.route("/")
-def home():
-    return render_template("index.html")
-
 @app.route("/weather")
 def get_weather():
     city = request.args.get("city")

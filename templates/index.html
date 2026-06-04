@@ -31,6 +31,7 @@
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
+            color: black;
         }
         .weather-card {
             background: #16213e;
@@ -54,6 +55,7 @@
             text-align: center;
         }
         th { background: #00d4ff22; color: #00d4ff; }
+        .loading { color: #00d4ff; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -64,6 +66,8 @@
         <input type="text" id="cityInput" placeholder="Enter city name..." />
         <button onclick="getWeather()">Get Weather</button>
     </div>
+
+    <p class="loading" id="loading" style="display:none;">Fetching data...</p>
 
     <div class="weather-card" id="weatherCard" style="display:none;">
         <h2 id="cityName"></h2>
@@ -91,12 +95,19 @@
     </table>
 
     <script>
+        const API_URL = "https://weather-etl-pipeline.onrender.com";
+
         async function getWeather() {
             const city = document.getElementById('cityInput').value;
             if (!city) return alert('Please enter a city name!');
 
-            const response = await fetch(`/weather?city=${city}`);
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('weatherCard').style.display = 'none';
+
+            const response = await fetch(`${API_URL}/weather?city=${city}`);
             const data = await response.json();
+
+            document.getElementById('loading').style.display = 'none';
 
             if (data.error) return alert(data.error);
 
@@ -112,7 +123,7 @@
         }
 
         async function loadHistory() {
-            const response = await fetch('/history');
+            const response = await fetch(`${API_URL}/history`);
             const data = await response.json();
             const tbody = document.getElementById('historyBody');
             tbody.innerHTML = '';
