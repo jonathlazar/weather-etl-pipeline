@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather ETL Pipeline</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        h1 { color: #00d4ff; }
+        input {
+            padding: 10px;
+            width: 300px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #00d4ff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .weather-card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            width: 400px;
+            text-align: center;
+        }
+        .temp { font-size: 48px; font-weight: bold; color: #00d4ff; }
+        .detail { margin: 8px 0; font-size: 16px; }
+        table {
+            margin-top: 40px;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 800px;
+        }
+        th, td {
+            padding: 10px 15px;
+            border: 1px solid #00d4ff33;
+            text-align: center;
+        }
+        th { background: #00d4ff22; color: #00d4ff; }
+    </style>
+</head>
+<body>
+    <h1>🌤️ Weather ETL Pipeline</h1>
+    <p>Enter a city to fetch live weather data</p>
+
+    <div>
+        <input type="text" id="cityInput" placeholder="Enter city name..." />
+        <button onclick="getWeather()">Get Weather</button>
+    </div>
+
+    <div class="weather-card" id="weatherCard" style="display:none;">
+        <h2 id="cityName"></h2>
+        <div class="temp" id="temp"></div>
+        <div class="detail" id="weather"></div>
+        <div class="detail" id="humidity"></div>
+        <div class="detail" id="wind"></div>
+        <div class="detail" id="timestamp"></div>
+    </div>
+
+    <h2 style="margin-top:40px;">📊 Search History</h2>
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>City</th>
+                <th>Country</th>
+                <th>Temp (°C)</th>
+                <th>Weather</th>
+                <th>Humidity</th>
+                <th>Wind Speed</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+    </table>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) return alert('Please enter a city name!');
+
+            const response = await fetch(`/weather?city=${city}`);
+            const data = await response.json();
+
+            if (data.error) return alert(data.error);
+
+            document.getElementById('cityName').innerText = `${data.city}, ${data.country}`;
+            document.getElementById('temp').innerText = `${data.temperature}°C`;
+            document.getElementById('weather').innerText = `🌤️ ${data.weather}`;
+            document.getElementById('humidity').innerText = `💧 Humidity: ${data.humidity}%`;
+            document.getElementById('wind').innerText = `💨 Wind: ${data.wind_speed} m/s`;
+            document.getElementById('timestamp').innerText = `🕐 ${data.timestamp}`;
+            document.getElementById('weatherCard').style.display = 'block';
+
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            const response = await fetch('/history');
+            const data = await response.json();
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                tbody.innerHTML += `<tr>
+                    <td>${row.city}</td>
+                    <td>${row.country}</td>
+                    <td>${row.temperature}</td>
+                    <td>${row.weather}</td>
+                    <td>${row.humidity}%</td>
+                    <td>${row.wind_speed} m/s</td>
+                    <td>${row.timestamp}</td>
+                </tr>`;
+            });
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>
