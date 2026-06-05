@@ -54,7 +54,7 @@ def get_weather():
 @app.route("/history")
 def history():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT * FROM weather ORDER BY timestamp DESC"))
+        result = conn.execute(text("SELECT * FROM weather ORDER BY timestamp DESC LIMIT 10"))
         rows = [dict(row._mapping) for row in result]
     return jsonify(rows)
 
